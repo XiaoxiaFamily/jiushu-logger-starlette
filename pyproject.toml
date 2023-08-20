@@ -29,7 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-    "flask-unittest"
+    "python-multipart",
 ]
 
 [project.urls]
