@@ -60,7 +60,8 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
                 trace_id = str(get_context().segment.segment_id)
             except:
                 pass
-        request.state.trace_id = trace_id or ULID().hex
+        trace_id = trace_id or ULID().hex
+        request.state.trace_id = trace_id
 
         start_time = perf_counter()
         response = await call_next(request)
