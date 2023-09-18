@@ -21,6 +21,8 @@ async def _test(request: Request):
 
 
 async def _test2(request: Request):
+    await request.body()
+    await request.json()
     await sleep(1.23456)
     return JSONResponse({'result': True}, headers={'Content-Type': 'application/json'})
 
