@@ -5,15 +5,13 @@ from itertools import chain
 from time import perf_counter
 
 import orjson
-from jiushu_logger import Logger, ReqLogExtra
+from jiushu_logger import Logger, ReqLogExtra, safely_jsonify
 from starlette.applications import Starlette
 from starlette.concurrency import iterate_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
 from ulid import ULID
-
-from ._helpers import *
 
 try:
     import skywalking
@@ -22,6 +20,25 @@ except:
     skywalking = NotImplemented
 
 __all__ = ['RouterLoggingMiddleware']
+
+ENV_HEADERS = (
+    'X-Varnish',
+    'X-Request-Start',
+    'X-Heroku-Queue-Depth',
+    'X-Real-Ip',
+    'X-Forwarded-Proto',
+    'X-Forwarded-Protocol',
+    'X-Forwarded-Ssl',
+    'X-Heroku-Queue-Wait-Time',
+    'X-Forwarded-For',
+    'X-Heroku-Dynos-In-Use',
+    'X-Forwarded-Protocol',
+    'X-Forwarded-Port',
+    'X-Request-Id',
+    'Via',
+    'Total-Route-Time',
+    'Connect-Time'
+)
 
 
 def _get_headers(request: Request):
@@ -63,15 +80,7 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
         trace_id = trace_id or ULID().hex
         request.state.trace_id = trace_id
 
-        start_time = perf_counter()
-        response = await call_next(request)
-        duration = perf_counter() - start_time
-
         # https://github.com/encode/starlette/issues/495
-        resp_body = [section async for section in response.__dict__['body_iterator']]
-        response.__setattr__('body_iterator', iterate_in_threadpool(iter(resp_body)))
-
-        # request body
         data = await request.body()
         form = dict(await request.form())
         try:
@@ -86,6 +95,14 @@ class RouterLoggingMiddleware(BaseHTTPMiddleware):
                 body = data
         else:
             body = json_
+
+        start_time = perf_counter()
+        response = await call_next(request)
+        duration = perf_counter() - start_time
+
+        # https://github.com/encode/starlette/issues/495
+        resp_body = [section async for section in response.__dict__['body_iterator']]
+        response.__setattr__('body_iterator', iterate_in_threadpool(iter(resp_body)))
 
         # response body
         resp = b''.join(resp_body)
