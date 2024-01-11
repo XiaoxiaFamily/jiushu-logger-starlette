@@ -21,23 +21,24 @@ except:
 
 __all__ = ['RouterLoggingMiddleware']
 
+# Must be lowercase (see request.headers)
 ENV_HEADERS = (
-    'X-Varnish',
-    'X-Request-Start',
-    'X-Heroku-Queue-Depth',
-    'X-Real-Ip',
-    'X-Forwarded-Proto',
-    'X-Forwarded-Protocol',
-    'X-Forwarded-Ssl',
-    'X-Heroku-Queue-Wait-Time',
-    'X-Forwarded-For',
-    'X-Heroku-Dynos-In-Use',
-    'X-Forwarded-Protocol',
-    'X-Forwarded-Port',
-    'X-Request-Id',
-    'Via',
-    'Total-Route-Time',
-    'Connect-Time'
+    'x-varnish',
+    'x-request-start',
+    'x-heroku-queue-depth',
+    'x-real-ip',
+    'x-forwarded-proto',
+    'x-forwarded-protocol',
+    'x-forwarded-ssl',
+    'x-heroku-queue-wait-time',
+    'x-forwarded-for',
+    'x-heroku-dynos-in-use',
+    'x-forwarded-protocol',
+    'x-forwarded-port',
+    'x-request-id',
+    'via',
+    'total-route-time',
+    'connect-time'
 )
 
 
